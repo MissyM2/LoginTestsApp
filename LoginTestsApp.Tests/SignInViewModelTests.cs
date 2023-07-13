@@ -30,7 +30,7 @@ namespace LoginTestsApp.Tests
 
         private SignInViewModel CreateInstance()
         {
-            return new SignInViewModel(_userService.Object, _pageService.Object)
+            return new SignInViewModel(_userService.Object, _pageService.Object);
         }
     }
 }
