@@ -1,5 +1,6 @@
 using LoginTestsApp.Console;
 using Moq;
+using Shouldly;
 
 namespace LoginTestsApp.Tests
 {
@@ -43,6 +44,45 @@ namespace LoginTestsApp.Tests
             _userService.Verify();
             _pageService.Verify(x => x.DisplayAlert(It.IsAny<string>(), "Invalid Credentials", It.IsAny<string>()));
             _pageService.VerifyNoOtherCalls();
+
+        }
+
+        [Fact]
+        public void DisplayAlertShouldBeCalledForInvalidPassword()
+        {
+            // **** Arrange **** (Given)
+            var vm = CreateInstance();
+            vm.EmailEntry = "test@email.ru";
+            vm.PasswordEntry = "password";
+            _userService.Setup(x => x.LoginUser(It.IsAny<string>())).Returns(new User(vm.EmailEntry, "ppppp")).Verifiable();
+
+            // ***** Act ***** (When)
+            vm.LoginCommand.Execute(null);
+
+            // ***** Assert ***** (Then)
+            _userService.Verify();
+            _pageService.Verify(x => x.DisplayAlert(It.IsAny<string>(), "Invalid Credentials", It.IsAny<string>()));
+            _pageService.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void DisplayAlertShouldBeCalledForInvalidPassword2()
+        {
+            // **** Arrange **** (Given)
+            var vm = CreateInstance();
+            vm.EmailEntry = "test@email.ru";
+            vm.PasswordEntry = "password";
+            User user = new User(vm.EmailEntry, vm.PasswordEntry);
+            _userService.Setup(x => x.LoginUser(It.IsAny<string>())).Returns(user).Verifiable();
+
+            // ***** Act ***** (When)
+            vm.LoginCommand.Execute(null);
+
+            // ***** Assert ***** (Then)
+            _userService.Verify();
+            _pageService.Verify(x => x.PushAsync(It.Is<HomePage>(y => y.User == user)));
+            _pageService.VerifyNoOtherCalls();
+            vm.PasswordEntry.ShouldBeNullOrEmpty();
 
         }
 
